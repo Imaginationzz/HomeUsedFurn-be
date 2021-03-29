@@ -17,6 +17,7 @@ const {
 
   const usersRouter = require("./services/users");
   const productsRouter = require("./services/products");
+  const orderRouter = require("./services/orders");
 
 
   const server = express();
@@ -51,6 +52,8 @@ server.use(express.static(staticFolderPath));
 
 server.use("/user", usersRouter);
 server.use("/products", productsRouter);
+server.use("/order", orderRouter);
+
 
   //ERRORS
   

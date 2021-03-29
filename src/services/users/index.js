@@ -26,16 +26,6 @@ usersRouter.get("/me", authorize, async (req, res, next) => {
   }
 })
 
-usersRouter.post("/register", async (req, res, next) => {
-  try {
-    const newUser = new UserModel(req.body)
-    const { _id } = await newUser.save()
-
-    res.status(201).send(_id)
-  } catch (error) {
-    next(error)
-  }
-})
 
 usersRouter.put("/me", authorize, async (req, res, next) => {
   try {
@@ -61,7 +51,17 @@ usersRouter.post("/login", async (req, res, next) => {
     const { email, password } = req.body
     const user = await UserModel.findByCredentials(email, password)
     const token = await authenticate(user)
-    res.send(token)
+    res.send({ token, userName: user.userName, role: role })
+  } catch (error) {
+    next(error)
+  }
+})
+usersRouter.post("/register", async (req, res, next) => {
+  try {
+    const newUser = new UserModel(req.body)
+    const { _id } = await newUser.save()
+    const token = await authenticate(user)
+    res.status(201).send({ token, firstNname: newUser.firstName, userName: newUser.userName, role: newUser.role })
   } catch (error) {
     next(error)
   }
@@ -94,20 +94,20 @@ usersRouter.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 )
 
-  usersRouter.get(
-    "/googleRedirect",
-    passport.authenticate("google"),
-    async (req, res, next) => {
-      try {
-        res.cookie("accessToken", req.user.tokens.accessToken, {
-          httpOnly: true,
-        })
-        
-        res.status(200).redirect("http://localhost:3000")
-      } catch (error) {
-        next(error)
-      }
+usersRouter.get(
+  "/googleRedirect",
+  passport.authenticate("google"),
+  async (req, res, next) => {
+    try {
+      res.cookie("accessToken", req.user.tokens.accessToken, {
+        httpOnly: true,
+      })
+
+      res.status(200).redirect("http://localhost:3000")
+    } catch (error) {
+      next(error)
     }
-  )
+  }
+)
 
 module.exports = usersRouter

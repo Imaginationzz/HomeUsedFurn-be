@@ -23,12 +23,12 @@ image:{
     
 price:{
     type:Number,
-    required:true
+    
     
 },
 countInStock:{ 
     type:Number,
-    required:true
+   
 },
 brand:{ 
     type:String

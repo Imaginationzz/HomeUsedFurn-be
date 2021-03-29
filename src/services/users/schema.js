@@ -11,14 +11,14 @@ firstName:{
 },
 lastName:{ 
     type:String,
-    required:true,
+    
     trim:true,
     min:3,
     max:20
 },
 userName:{ 
     type:String,
-    required:true,
+    
     trim:true,
     unique:true,
     index:true,
