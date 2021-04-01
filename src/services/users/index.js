@@ -51,7 +51,7 @@ usersRouter.post("/login", async (req, res, next) => {
     const { email, password } = req.body
     const user = await UserModel.findByCredentials(email, password)
     const token = await authenticate(user)
-    res.send({ token, userName: user.userName, role: role })
+    res.send({ token, userName: user.userName, role: user.role })
   } catch (error) {
     next(error)
   }
@@ -60,9 +60,10 @@ usersRouter.post("/register", async (req, res, next) => {
   try {
     const newUser = new UserModel(req.body)
     const { _id } = await newUser.save()
-    const token = await authenticate(user)
+    const token = await authenticate(newUser)
     res.status(201).send({ token, firstNname: newUser.firstName, userName: newUser.userName, role: newUser.role })
   } catch (error) {
+    console.log(error)
     next(error)
   }
 })
