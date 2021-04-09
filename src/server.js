@@ -1,11 +1,12 @@
-const express= require("express");
+const express = require("express");
 const cors = require("cors");
 const passport = require("passport");
 const { join } = require("path")
+const http = require("http")
 
- const listEndpoint = require("express-list-endpoints");
- const mongoose = require("mongoose");
- const oauth = require("./services/auth/oauth")
+const listEndpoint = require("express-list-endpoints");
+const mongoose = require("mongoose");
+const oauth = require("./services/auth/oauth")
 //ERRORS IMPORTS
 const {
   notFoundHandler,
@@ -14,18 +15,21 @@ const {
   genericErrorHandler,
 } = require("./errorHandlers")
 
-
-  const usersRouter = require("./services/users");
-  const productsRouter = require("./services/products");
-  const orderRouter = require("./services/orders");
+const createSocketServer = require("./socket")
 
 
-  const server = express();
+const usersRouter = require("./services/users");
+const productsRouter = require("./services/products");
+const orderRouter = require("./services/orders");
+
+
+const server = express();
+const httpServer = http.createServer(server)
+createSocketServer(httpServer)
 
 
 
-
-  const PORT = process.env.PORT || 3002,
+const PORT = process.env.PORT || 3002,
   accessOrigin =
     process.env.NODE_ENV === "production"
       ? [process.env.FE_URL_DEV, process.env.FE_URL_PROD]
@@ -41,13 +45,13 @@ const {
       }
     },
   };
-  //MIDDLEWARE
-  server.use(express.json());
-  server.use(cors(corsOptions));
-  const staticFolderPath = join(__dirname, "../public");
+//MIDDLEWARE
+server.use(express.json());
+server.use(cors(corsOptions));
+const staticFolderPath = join(__dirname, "../public");
 server.use(express.static(staticFolderPath));
-  //server.use(passport.initialize());
-  
+//server.use(passport.initialize());
+
 //routes
 
 server.use("/user", usersRouter);
@@ -55,30 +59,29 @@ server.use("/products", productsRouter);
 server.use("/order", orderRouter);
 
 
-  //ERRORS
-  
+//ERRORS
+
 server.use(badRequestHandler)
 server.use(forbiddenHandler)
 server.use(notFoundHandler)
 server.use(genericErrorHandler)
-  
-  //CONSOLE LOGS
-  console.log(listEndpoint(server));
-  
-  //MONGODB CONNECTION
-  mongoose
-    .connect(process.env.MONGODB_CONNECTION, {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+
+//CONSOLE LOGS
+console.log(listEndpoint(server));
+
+//MONGODB CONNECTION
+mongoose
+  .connect(process.env.MONGODB_CONNECTION, {
+    useCreateIndex: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  //SERVER LISTEN
+  .then(
+    server.listen(PORT, () => {
+      process.env.NODE_ENV === "production"
+        ? console.log(`Server running ONLINE on : ${PORT}`)
+        : console.log(`Server running LOCALLY on : http://localhost:${PORT}`);
     })
-    //SERVER LISTEN
-    .then(
-      server.listen(PORT, () => {
-        process.env.NODE_ENV === "production"
-          ? console.log(`Server running ONLINE on : ${PORT}`)
-          : console.log(`Server running LOCALLY on : http://localhost:${PORT}`);
-      })
-    )
-    .catch((error) => console.log(error));
-  
+  )
+  .catch((error) => console.log(error));

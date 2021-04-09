@@ -5,6 +5,10 @@ const orderModel = require("./schema")
 
 const orderRouter = express.Router()
 
+orderRouter.get('/paypal', (req, res) => {
+    res.send(process.env.PAYPAL_CLIENT_ID || 'sb');
+});
+
 orderRouter.post("/", async (req, res, next) => {
     //console.log(req.body.order.orderItems)
     try {
